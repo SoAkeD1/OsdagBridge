@@ -37,7 +37,7 @@ BOQ support
 import math
 
 from osdagbridge.core.ifc_export_bridge.bridge_geometry_mapper import create_ifc_guid
-from osdagbridge.core.bridge_components.rebar_utils import rebar_length
+from osdagbridge.core.bridge_components.rebar_utils import rebar_length, ring_points
 
 S = 0.001                     # mm -> m
 STEEL_DENSITY = 7850.0        # kg/m3
@@ -127,33 +127,18 @@ class SubstructureIfcWriter:
 
     # ---------------------------------------------------------------- rebar
     def _rebar_items_to_solids(self, items):
-        """
-        Directrices:
-          * ring -> IfcCircle (a disk swept along a closed polygon fails to
-            tessellate in IfcOpenShell/OCC because of the sharp corners)
-          * loop -> one straight IfcSweptDiskSolid per leg of the stirrup
-          * line / poly -> IfcPolyline
-        """
         solids = []
-        r = lambda it: it["dia"] / 2.0 * S
-
-        def sweep(directrix, it):
-            solids.append(self.f.createIfcSweptDiskSolid(directrix, r(it), None, None, None))
-
-        def polyline(pts):
-            return self.f.createIfcPolyline(
-                [self.mapper.create_cartesian_point_3d(*(c * S for c in p)) for p in pts])
-
         for it in items:
             if it["kind"] == "ring":
-                pos = self.mapper.create_axis2placement_3d([c * S for c in it["center"]])
-                sweep(self.f.createIfcCircle(pos, it["radius"] * S), it)
+                pts = ring_points(it["center"], it["radius"])
+                pts = pts + [pts[0]]
             elif it["kind"] == "loop":
                 pts = list(it["pts"]) + [it["pts"][0]]
-                for a, b in zip(pts[:-1], pts[1:]):
-                    sweep(polyline([a, b]), it)
             else:
-                sweep(polyline(it["pts"]), it)
+                pts = list(it["pts"])
+            ifc_pts = [self.mapper.create_cartesian_point_3d(*(c * S for c in p)) for p in pts]
+            directrix = self.f.createIfcPolyline(ifc_pts)
+            solids.append(self.f.createIfcSweptDiskSolid(directrix, it["dia"] / 2.0 * S, None, None, None))
         return solids
 
     def _rebar_set(self, name, items, placement, grade, host_name):
@@ -316,25 +301,6 @@ class SubstructureIfcWriter:
             self.f.createIfcRelAssociatesMaterial(create_ifc_guid(), self.oh, None, None, elems, mat)
 
 
-def _ensure_model_data(cad_context):
-    """
-    Return an object whose ``model_data`` holds the substructure layout.
-
-    The GUI's File > Save 3D CAD Model > .ifc path hands the exporter a
-    ``BridgeParametersDTO`` (from ``get_ifc_export_parameters``), not the CAD
-    generator that drew the 3D view. In that case the model is generated from
-    the DTO with the same ``PlateGirderCADGenerator`` the 3D window uses, so
-    the exported substructure is identical to what is displayed.
-    """
-    data = getattr(cad_context, "model_data", None) or {}
-    if data.get("substructure_units"):
-        return cad_context
-    from osdagbridge.core.bridge_types.plate_girder.cad_generator import PlateGirderCADGenerator
-    gen = PlateGirderCADGenerator()
-    gen.model_data = gen.generate(cad_context)
-    return gen
-
-
-def add_substructure_to_ifc(generator, cad_context):
+def add_substructure_to_ifc(generator, cad_generator):
     """Entry point used by BridgeIfcGenerator.generate_from_extracted_data."""
-    SubstructureIfcWriter(generator).write(_ensure_model_data(cad_context))
+    SubstructureIfcWriter(generator).write(cad_generator)

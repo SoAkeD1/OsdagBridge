@@ -478,33 +478,48 @@ class CAD3DWindow(QWidget):
 
         display_and_register(
             cad_data.get("pier_caps", []), "Pier Cap",
-            f"Pier Cap (hammerhead)\nBottom Width: {sp.get('pier_cap_bottom_width', 0):.0f} mm\n"
-            f"Depth: {sp.get('pier_cap_depth', 0):.0f} mm\nConcrete: {sp.get('concrete_grade', '')}",
+            f"Pier Cap (hammerhead)
+Bottom Width: {sp.get('pier_cap_bottom_width', 0):.0f} mm
+"
+            f"Depth: {sp.get('pier_cap_depth', 0):.0f} mm
+Concrete: {sp.get('concrete_grade', '')}",
             CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
         display_and_register(
             cad_data.get("pedestals", []), "Pedestal",
-            f"Bearing Pedestal\nHeight: {sp.get('pedestal_height', 0):.0f} mm",
+            f"Bearing Pedestal
+Height: {sp.get('pedestal_height', 0):.0f} mm",
             CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
         display_and_register(
             cad_data.get("piers", []), "Pier",
-            f"Pier (circular)\nDiameter: {sp.get('pier_diameter', 0):.0f} mm\n"
-            f"Height: {sp.get('pier_height', 0):.0f} mm\nConcrete: {sp.get('concrete_grade', '')}",
+            f"Pier (circular)
+Diameter: {sp.get('pier_diameter', 0):.0f} mm
+"
+            f"Height: {sp.get('pier_height', 0):.0f} mm
+Concrete: {sp.get('concrete_grade', '')}",
             CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
         display_and_register(
             cad_data.get("pile_caps", []), "Pile Cap",
-            f"Pile Cap\n{sp.get('pile_cap_length', 0):.0f} x {sp.get('pile_cap_width', 0):.0f} x "
-            f"{sp.get('pile_cap_depth', 0):.0f} mm\nConcrete: {sp.get('concrete_grade', '')}",
+            f"Pile Cap
+{sp.get('pile_cap_length', 0):.0f} x {sp.get('pile_cap_width', 0):.0f} x "
+            f"{sp.get('pile_cap_depth', 0):.0f} mm
+Concrete: {sp.get('concrete_grade', '')}",
             CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
         display_and_register(
             cad_data.get("piles", []), "Pile",
-            f"Pile\nDiameter: {sp.get('pile_diameter', 0):.0f} mm\n"
-            f"Length: {sp.get('pile_length', 0):.0f} mm\nSpacing: {sp.get('pile_spacing', 0):.0f} mm c/c",
+            f"Pile
+Diameter: {sp.get('pile_diameter', 0):.0f} mm
+"
+            f"Length: {sp.get('pile_length', 0):.0f} mm
+Spacing: {sp.get('pile_spacing', 0):.0f} mm c/c",
             CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
         display_and_register(
             cad_data.get("substructure_rebar", []), "Substructure Rebar",
-            f"Reinforcement ({sp.get('rebar_grade', '')})\n"
-            f"Main: dia {sp.get('rebar_main_diameter', 0):.0f} @ {sp.get('rebar_spacing_longitudinal', 0):.0f}\n"
-            f"Transverse: dia {sp.get('rebar_transverse_diameter', 0):.0f} @ {sp.get('rebar_spacing_transverse', 0):.0f}\n"
+            f"Reinforcement ({sp.get('rebar_grade', '')})
+"
+            f"Main: dia {sp.get('rebar_main_diameter', 0):.0f} @ {sp.get('rebar_spacing_longitudinal', 0):.0f}
+"
+            f"Transverse: dia {sp.get('rebar_transverse_diameter', 0):.0f} @ {sp.get('rebar_spacing_transverse', 0):.0f}
+"
             f"Cover: {sp.get('rebar_cover', 0):.0f} mm",
             REBAR_COLOR, selectable=False)
 
