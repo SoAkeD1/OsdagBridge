@@ -471,8 +471,8 @@ class CAD3DWindow(QWidget):
         # Concrete members are drawn semi-transparent (opacity 0.35, i.e.
         # OCC transparency 0.65) so the reinforcement cage inside stays
         # visible; rebar is drawn opaque in a steel colour.
-        CONCRETE_COLOR = Quantity_Color(0.62, 0.66, 0.70, Quantity_TOC_RGB)
-        REBAR_COLOR = Quantity_Color(0.55, 0.27, 0.07, Quantity_TOC_RGB)  # rusty steel
+        CONCRETE_COLOR = Quantity_Color(0.55, 0.57, 0.60, Quantity_TOC_RGB)
+        REBAR_COLOR = Quantity_Color(0.20, 0.22, 0.27, Quantity_TOC_RGB)  # dark steel
         CONCRETE_TRANSPARENCY = 1.0 - 0.35
         sp = cad_data.get("substructure_params", {}) or {}
 

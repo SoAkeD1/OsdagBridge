@@ -26,9 +26,9 @@ def rgb(r, g, b):
 SUPER = [("girders", rgb(0.53, 0.53, 0.39), None), ("cross_bracings", rgb(0.24, 0.24, 0.24), None),
          ("deck_slab", rgb(0.39, 0.39, 0.39), 0.5), ("crash_barriers", rgb(0.16, 0.16, 0.16), None),
          ("railings", rgb(0.16, 0.16, 0.16), None)]
-CONCRETE = rgb(0.62, 0.66, 0.70)
+CONCRETE = rgb(0.55, 0.57, 0.60)
 SUB = [(k, CONCRETE, 0.65) for k in ("pier_caps", "pedestals", "piers", "pile_caps", "piles")]
-REBAR = [("substructure_rebar", rgb(0.55, 0.27, 0.07), None)]
+REBAR = [("substructure_rebar", rgb(0.20, 0.22, 0.27), None)]
 
 
 def render(md, layers, path, view="iso", size=(1600, 1000)):
@@ -64,6 +64,21 @@ def main():
     render(md, SUPER + SUB + REBAR, os.path.join(out, "bridge_side.png"), "right")
     render(md, SUB + REBAR, os.path.join(out, "substructure_iso.png"))
     render(md, REBAR, os.path.join(out, "rebar_only_iso.png"))
+
+    # Close-up of one pier unit (local frame of unit P1)
+    c = md["substructure_units"][0]["components"]
+    unit = {
+        "pier_caps": c["pier_cap"]["concrete"], "pedestals": c["pedestals"]["concrete"],
+        "piers": c["pier"]["concrete"], "pile_caps": c["pile_cap"]["concrete"],
+        "piles": c["piles"]["concrete"],
+        "substructure_rebar": [c["pier_cap"]["rebar"], c["pier"]["rebar"],
+                               c["pile_cap"]["rebar"], c["piles"]["rebar"]],
+    }
+    render(unit, SUB + REBAR, os.path.join(out, "unit_iso.png"), size=(1200, 1400))
+    render(unit, SUB + REBAR, os.path.join(out, "unit_front.png"), "right", size=(1600, 1100))
+    foundation = {k: unit[k] for k in ("piers", "pile_caps", "piles")}
+    foundation["substructure_rebar"] = [c["pier"]["rebar"], c["pile_cap"]["rebar"], c["piles"]["rebar"]]
+    render(foundation, SUB + REBAR, os.path.join(out, "foundation_iso.png"), size=(1200, 1400))
 
 
 if __name__ == "__main__":

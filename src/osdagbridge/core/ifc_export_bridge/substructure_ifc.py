@@ -41,8 +41,9 @@ from osdagbridge.core.bridge_components.rebar_utils import rebar_length, ring_po
 
 S = 0.001                     # mm -> m
 STEEL_DENSITY = 7850.0        # kg/m3
-CONCRETE_RGB = (0.62, 0.66, 0.70)
-REBAR_RGB = (0.55, 0.27, 0.07)
+CONCRETE_RGB = (0.55, 0.57, 0.60)
+REBAR_RGB = (0.20, 0.22, 0.27)
+CONCRETE_TRANSPARENCY = 0.65   # opacity 0.35, same as the 3D CAD window
 
 
 class SubstructureIfcWriter:
@@ -62,9 +63,9 @@ class SubstructureIfcWriter:
     def _identity(self):
         return self.mapper.create_axis2placement_3d((0., 0., 0.))
 
-    def _shape(self, items, rep_type, rgb):
+    def _shape(self, items, rep_type, rgb, transparency=None):
         rep = self.f.createIfcShapeRepresentation(self.mapper._context3d, "Body", rep_type, items)
-        self.mapper.apply_color(rep, rgb)
+        self.mapper.apply_color(rep, rgb, transparency)
         return self.f.createIfcProductDefinitionShape(None, None, [rep])
 
     def _material(self, element, name, category):
@@ -120,7 +121,7 @@ class SubstructureIfcWriter:
     def _concrete_element(self, ifc_class, name, placement, solid, grade, **attrs):
         elem = getattr(self.f, "create" + ifc_class)(
             create_ifc_guid(), self.oh, Name=name, ObjectPlacement=placement,
-            Representation=self._shape([solid], "SweptSolid", CONCRETE_RGB), **attrs)
+            Representation=self._shape([solid], "SweptSolid", CONCRETE_RGB, CONCRETE_TRANSPARENCY), **attrs)
         self._material(elem, f"Concrete {grade}", "Concrete")
         return elem
 
