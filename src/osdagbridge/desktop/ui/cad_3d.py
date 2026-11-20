@@ -467,6 +467,62 @@ class CAD3DWindow(QWidget):
             BARRIER_COLOR
         )
 
+        # SUBSTRUCTURE + FOUNDATION
+        # Concrete members are drawn semi-transparent (opacity 0.35, i.e.
+        # OCC transparency 0.65) so the reinforcement cage inside stays
+        # visible; rebar is drawn opaque in a steel colour.
+        CONCRETE_COLOR = Quantity_Color(0.62, 0.66, 0.70, Quantity_TOC_RGB)
+        REBAR_COLOR = Quantity_Color(0.55, 0.27, 0.07, Quantity_TOC_RGB)  # rusty steel
+        CONCRETE_TRANSPARENCY = 1.0 - 0.35
+        sp = cad_data.get("substructure_params", {}) or {}
+
+        display_and_register(
+            cad_data.get("pier_caps", []), "Pier Cap",
+            f"Pier Cap (hammerhead)
+Bottom Width: {sp.get('pier_cap_bottom_width', 0):.0f} mm
+"
+            f"Depth: {sp.get('pier_cap_depth', 0):.0f} mm
+Concrete: {sp.get('concrete_grade', '')}",
+            CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
+        display_and_register(
+            cad_data.get("pedestals", []), "Pedestal",
+            f"Bearing Pedestal
+Height: {sp.get('pedestal_height', 0):.0f} mm",
+            CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
+        display_and_register(
+            cad_data.get("piers", []), "Pier",
+            f"Pier (circular)
+Diameter: {sp.get('pier_diameter', 0):.0f} mm
+"
+            f"Height: {sp.get('pier_height', 0):.0f} mm
+Concrete: {sp.get('concrete_grade', '')}",
+            CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
+        display_and_register(
+            cad_data.get("pile_caps", []), "Pile Cap",
+            f"Pile Cap
+{sp.get('pile_cap_length', 0):.0f} x {sp.get('pile_cap_width', 0):.0f} x "
+            f"{sp.get('pile_cap_depth', 0):.0f} mm
+Concrete: {sp.get('concrete_grade', '')}",
+            CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
+        display_and_register(
+            cad_data.get("piles", []), "Pile",
+            f"Pile
+Diameter: {sp.get('pile_diameter', 0):.0f} mm
+"
+            f"Length: {sp.get('pile_length', 0):.0f} mm
+Spacing: {sp.get('pile_spacing', 0):.0f} mm c/c",
+            CONCRETE_COLOR, transparency=CONCRETE_TRANSPARENCY)
+        display_and_register(
+            cad_data.get("substructure_rebar", []), "Substructure Rebar",
+            f"Reinforcement ({sp.get('rebar_grade', '')})
+"
+            f"Main: dia {sp.get('rebar_main_diameter', 0):.0f} @ {sp.get('rebar_spacing_longitudinal', 0):.0f}
+"
+            f"Transverse: dia {sp.get('rebar_transverse_diameter', 0):.0f} @ {sp.get('rebar_spacing_transverse', 0):.0f}
+"
+            f"Cover: {sp.get('rebar_cover', 0):.0f} mm",
+            REBAR_COLOR, selectable=False)
+
         # Nodes and grillage overlays
         node_positions = self._render_nodes()
         self._render_grillage(node_positions)
@@ -716,6 +772,8 @@ class CAD3DWindow(QWidget):
             "Crash Barrier": ["Crash Barrier", "Crash Barrier W-Beam"],
             "Median":        ["Median", "Median W-Beam"],
             "Railing":       ["Railing"],
+            "Substructure":  ["Pier Cap", "Pedestal", "Pier", "Pile Cap", "Pile"],
+            "Reinforcement": ["Substructure Rebar"],
             "Grillage":      ["Grillage"],
             "Node":          ["Node"],
         }
@@ -1209,6 +1267,8 @@ class BridgeComponentCheckbox(QWidget):
         ("Crash Barrier", "Crash Barrier"),
         ("Median",        "Median"),
         ("Railing",       "Railing"),
+        ("Substructure",  "Substructure"),
+        ("Reinforcement", "Reinforcement"),
         ("Grillage view", "Grillage"),
         ("Node",          "Node"),
         ("Node Numbers",  "NodeNumbers"),
