@@ -47,6 +47,10 @@ from osdagbridge.core.bridge_components.super_structure.median.builder import (
 from osdagbridge.core.bridge_components.super_structure.cross_bracing.builder import (
     build_cross_bracings
 )
+# Substructure (pier cap, pier, pedestals) + foundation (pile cap, piles) builders
+from osdagbridge.core.bridge_components.sub_structure.assembly import (
+    build_substructure
+)
 
 from osdagbridge.core.bridge_types.plate_girder.dto import (
     BridgeParametersDTO,
@@ -60,6 +64,8 @@ KEY_CAD_DECK = "Deck"
 KEY_CAD_CRASH_BARRIER = "Crash Barrier"
 KEY_CAD_RAILING = "Railing"
 KEY_CAD_MEDIAN = "Median"
+KEY_CAD_SUBSTRUCTURE = "Substructure"
+KEY_CAD_REINFORCEMENT = "Reinforcement"
 KEY_MODULE_PG = "Plate Girder"
 
 
@@ -908,6 +914,26 @@ class PlateGirderCADGenerator:
         
         supports = supports_tri + supports_cyl
 
+        # STEP 12: BUILD SUBSTRUCTURE (pier cap, pier, pile cap, piles, rebar)
+        #
+        # One pier unit is placed under each support line (x = 0 and x = L).
+        # The pier cap top is tied to the girder soffit so the substructure
+        # always sits under the superstructure whatever girder depth the
+        # design produces. Substructure dimensions are the hard-coded
+        # parametric defaults in sub_structure/assembly.py; a design can
+        # override them through an optional `substructure_params` dict.
+        girder_bottom_z = -(self.girder_section_d / 2) - self.girder_section_tf_b
+        substructure = build_substructure(
+            span_length=self.span_length_L,
+            z_bearing=girder_bottom_z,
+            deck_width=deck_out["total_deck_width"],
+            num_girders=self.num_girders,
+            girder_spacing=self.girder_spacing,
+            skew_angle=self.skew_angle,
+            params={"concrete_grade": self.concrete_grade,
+                    **(getattr(design_params, "substructure_params", None) or {})},
+        )
+
         # RETURN ALL GENERATED COMPONENTS
         
         return {
@@ -956,7 +982,19 @@ class PlateGirderCADGenerator:
             "median_w_beams": median_w_beams,
             
             # Railings
-            "railings": railings
+            "railings": railings,
+
+            # Substructure + foundation (concrete solids, global frame)
+            "pier_caps": substructure["pier_cap"],
+            "piers": substructure["pier"],
+            "pedestals": substructure["pedestals"],
+            "pile_caps": substructure["pile_cap"],
+            "piles": substructure["piles"],
+            # Reinforcement of all substructure members (opaque steel)
+            "substructure_rebar": substructure["substructure_rebar"],
+            # Per-unit layout (local frames + rebar centre-lines) for IFC export
+            "substructure_units": substructure["substructure_units"],
+            "substructure_params": substructure["substructure_params"],
         }
 
     def create3Dcad(self):
@@ -1013,7 +1051,8 @@ class PlateGirderCADGenerator:
         # Collect shapes from model_data, excluding support geometry from export.
         shapes = []
         for key, v in self.model_data.items():
-            if key in {"supports", "supports_tri", "supports_cyl"}:
+            if key in {"supports", "supports_tri", "supports_cyl",
+                       "substructure_units", "substructure_params"}:
                 continue
             shapes.extend(_flatten(v))
 

@@ -36,7 +36,8 @@ class BridgeIfcGenerator:
             ApplicationDeveloper=org, Version="1.0", ApplicationFullName="Osdag Bridge", ApplicationIdentifier="OSDAG_BRIDGE_IFC"
         )
         self._owner_history = self.file.createIfcOwnerHistory(
-            OwningUser=person_org, OwningApplication=app, ChangeAction="ADDED", CreationDate=stamp
+            OwningUser=person_org, OwningApplication=app, ChangeAction="ADDED", CreationDate=stamp,
+            LastModifiedDate=stamp  # IFC4 rule: ChangeAction requires LastModifiedDate
         )
         
         # Baseline spatial hierarchy
@@ -51,6 +52,7 @@ class BridgeIfcGenerator:
         self.project = self.file.createIfcProject(
             create_ifc_guid(), self._owner_history,
             Name="Osdag Plate Girder Bridge",
+            LongName="Superstructure + Substructure",
             RepresentationContexts=[self.mapper._model_context],
             UnitsInContext=unit_assignment,
         )
@@ -620,5 +622,12 @@ class BridgeIfcGenerator:
                      _process_railing(item)
                  
         # Intentionally ignore "deck_textures"
+
+        # Substructure + foundation (pier caps, pedestals, piers, pile caps,
+        # piles and their reinforcement) in their own storeys.
+        if cad_context is not None:
+            from osdagbridge.core.ifc_export_bridge.substructure_ifc import add_substructure_to_ifc
+            add_substructure_to_ifc(self, cad_context)
+
         print("Model assembly complete. Saving...")
         self.file.write(self.output_path)
