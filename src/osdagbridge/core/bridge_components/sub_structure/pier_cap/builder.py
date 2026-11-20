@@ -1,4 +1,4 @@
-"""
+r"""
 Pier cap builder (substructure) - hammerhead / trapezoidal cap.
 
 Elevation (looking along the span, Y horizontal, Z up):
