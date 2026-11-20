@@ -36,7 +36,8 @@ class BridgeIfcGenerator:
             ApplicationDeveloper=org, Version="1.0", ApplicationFullName="Osdag Bridge", ApplicationIdentifier="OSDAG_BRIDGE_IFC"
         )
         self._owner_history = self.file.createIfcOwnerHistory(
-            OwningUser=person_org, OwningApplication=app, ChangeAction="ADDED", CreationDate=stamp
+            OwningUser=person_org, OwningApplication=app, ChangeAction="ADDED", CreationDate=stamp,
+            LastModifiedDate=stamp  # IFC4 rule: ChangeAction requires LastModifiedDate
         )
         
         # Baseline spatial hierarchy

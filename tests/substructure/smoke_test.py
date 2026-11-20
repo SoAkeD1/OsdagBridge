@@ -104,6 +104,16 @@ def main():
         kg += q.WeightValue
     print(f"BOQ substructure: concrete {vol:.2f} m3, reinforcement {kg:.0f} kg")
 
+    # Same call the GUI makes (template_page.py): the handler receives the
+    # BridgeParametersDTO, not the CAD generator.
+    out_gui = out.replace(".ifc", "_gui_path.ifc")
+    PlateGirderIfcExportHandler(sample_params(skew), out_gui).export()
+    g = ifcopenshell.open(out_gui)
+    n_sub = len(g.by_type("IfcPile")) + len(g.by_type("IfcReinforcingBar"))
+    print(f"GUI-path export: {len(g.by_type('IfcPile'))} piles, "
+          f"{len(g.by_type('IfcReinforcingBar'))} rebar sets")
+    assert n_sub > 0, "substructure missing from GUI-path IFC export"
+
 
 if __name__ == "__main__":
     main()
