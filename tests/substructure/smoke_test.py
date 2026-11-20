@@ -33,6 +33,7 @@ def sample_params(skew=0):
     angle = dict(leg_h=100, leg_w=50, connection_type="LONGER_LEG")
     small = dict(leg_h=80, leg_w=40, connection_type="LONGER_LEG")
     return BridgeParametersDTO(
+        steel_grade="E250", concrete_grade="M35",
         span_length_L=25_000, girder_section_d=900, girder_section_bf=500, girder_section_bf_b=500,
         girder_section_tf=260, girder_section_tf_b=260, girder_section_tw=100,
         num_girders=5, girder_spacing=2_750, skew_angle=skew,

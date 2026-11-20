@@ -930,7 +930,8 @@ class PlateGirderCADGenerator:
             num_girders=self.num_girders,
             girder_spacing=self.girder_spacing,
             skew_angle=self.skew_angle,
-            params=getattr(design_params, "substructure_params", None),
+            params={"concrete_grade": self.concrete_grade,
+                    **(getattr(design_params, "substructure_params", None) or {})},
         )
 
         # RETURN ALL GENERATED COMPONENTS
