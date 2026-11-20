@@ -1,5 +1,9 @@
 # OsdagBridge
 
+> **Substructure 3D CAD + IFC (FOSSEE Winter Internship 2026 screening task):** see
+> [SUBSTRUCTURE_README.md](SUBSTRUCTURE_README.md) for the files added, the data flow
+> and how to run the checks.
+
 OsdagBridge is a modular, shared-core software plugin for the analysis and design of steel bridges within the Osdag ecosystem.  
 It supports desktop (PySide6), web (Django + React), and CLI interfaces through a unified Python core.
 

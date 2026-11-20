@@ -100,3 +100,22 @@ cd src
 python -m osdagbridge.desktop                  # GUI: design, then File > Save 3D CAD Model > .ifc
 python ../tests/substructure/smoke_test.py out.ifc   # headless check + BOQ printout
 ```
+
+### Windows note
+
+On Windows 11 with **Smart App Control** on, the unsigned pythonocc-core / PySide6 /
+IfcOpenShell DLLs are blocked ("An Application Control policy has blocked this file").
+The work was developed and run in **WSL2 Ubuntu** (GUI through WSLg). There, start the
+desktop app with `QT_QPA_PLATFORM=xcb` so OpenCASCADE gets an X11 window:
+
+```
+QT_QPA_PLATFORM=xcb python -m osdagbridge.desktop
+```
+
+### Checks
+
+```
+python ../tests/substructure/smoke_test.py out.ifc [skew_deg]   # geometry + IFC (both export paths)
+python ../tests/substructure/ifc_boq.py out.ifc boq.csv         # BOQ from the IFC file
+python -m ifcopenshell.validate out.ifc                          # 0 errors
+```
