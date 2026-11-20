@@ -1,0 +1,42 @@
+name: substructure-check
+
+on:
+  push:
+    branches: [ci-substructure]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: osdagbridge-env
+          python-version: "3.12"
+          channels: osdag,geompy,conda-forge
+          conda-remove-defaults: "true"
+      - name: Install dependencies
+        run: |
+          conda install -y -c osdag -c geompy -c conda-forge osdag matplotlib fiona shapely "scipy>=1.10.1" pydantic xarray
+          pip install "openseespy>=3.2.2.6" opsvis
+          pip install -e .
+          sudo apt-get update && sudo apt-get install -y xvfb libgl1 libegl1 libxkbcommon-x11-0
+      - name: Smoke test (geometry + IFC + BOQ)
+        run: |
+          mkdir -p out
+          xvfb-run -a python tests/substructure/smoke_test.py out/osdag_bridge_substructure.ifc
+          xvfb-run -a python tests/substructure/smoke_test.py out/osdag_bridge_skew15.ifc 15
+      - name: IFC schema validation
+        run: python -m ifcopenshell.validate out/osdag_bridge_substructure.ifc 2>&1 | tail -40 || true
+      - name: Offscreen renders
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" python tests/substructure/render_views.py out/renders
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: substructure-output
+          path: out/
