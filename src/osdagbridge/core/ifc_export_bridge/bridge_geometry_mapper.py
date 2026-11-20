@@ -49,10 +49,14 @@ class BridgeGeometryMapper:
         xdr = self.file.createIfcDirection([float(v) for v in x_dir])
         return self.file.createIfcAxis2Placement2D(pt, xdr)
 
-    def apply_color(self, shape_rep, rgb_tuple):
-        """Applies an RGB color to an IfcShapeRepresentation."""
+    def apply_color(self, shape_rep, rgb_tuple, transparency=None):
+        """Applies an RGB color (and optional transparency 0..1) to an IfcShapeRepresentation."""
         rgb = self.file.createIfcColourRgb(None, float(rgb_tuple[0]), float(rgb_tuple[1]), float(rgb_tuple[2]))
-        surf_style = self.file.createIfcSurfaceStyleRendering(SurfaceColour=rgb)
+        # ReflectanceMethod is a required attribute of IfcSurfaceStyleRendering
+        surf_style = self.file.createIfcSurfaceStyleRendering(
+            SurfaceColour=rgb,
+            Transparency=float(transparency) if transparency is not None else None,
+            ReflectanceMethod="NOTDEFINED")
         surface_style = self.file.createIfcSurfaceStyle(None, "BOTH", [surf_style])
         for item in shape_rep.Items:
             self.file.createIfcStyledItem(item, [surface_style], None)
