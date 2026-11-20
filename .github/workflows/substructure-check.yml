@@ -32,7 +32,7 @@ jobs:
           xvfb-run -a python tests/substructure/smoke_test.py out/osdag_bridge_substructure.ifc
           xvfb-run -a python tests/substructure/smoke_test.py out/osdag_bridge_skew15.ifc 15
       - name: IFC schema validation
-        run: python -m ifcopenshell.validate out/osdag_bridge_substructure.ifc > out/validate.txt 2>&1 || true; grep -c 'Error' out/validate.txt || true; grep -A3 'Error' out/validate.txt | head -80
+        run: python -m ifcopenshell.validate out/osdag_bridge_substructure.ifc > out/validate.txt 2>&1 || true; grep -c 'Error' out/validate.txt || true; (grep -A3 'Error' out/validate.txt | head -80) || true; tail -2 out/validate.txt
       - name: Offscreen renders
         run: xvfb-run -a -s "-screen 0 1920x1080x24" python tests/substructure/render_views.py out/renders
       - uses: actions/upload-artifact@v4
